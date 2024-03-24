@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <#include "css/chameleon.css">
+        <#include "assets/chameleon.css">
         <meta charset="UTF-8">
         <title>Chameleon Report</title>
     </head>
     <body>
-        <h1>Chameleon Report</h1>
-        <div>Results of the image comparison can be found below...</div>
+        <div class="logo">
+            <img src="./logo.png" alt="Little Chameleon">
+        </div>
+        <div class="title">
+            <h1>Chameleon Report</h1>
+        </div>
         <div class="report-container">
             <#list results as result>
                 <div class="result-container">

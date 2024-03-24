@@ -5,6 +5,10 @@ body {
     color: #06211f;
     padding: 20px;
 }
+.logo, .title {
+    display: flex;
+    justify-content: center;
+}
 
 .result-summary {
   background-color: #dff7f7;

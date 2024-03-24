@@ -15,6 +15,7 @@ import static nl.nekhvoya.chameleon.Config.TEST_RESULTS_DIR;
 public class ReportConfig {
     public static final Configuration REPORT_CONFIG = new Configuration(Configuration.VERSION_2_3_32);
     public static final Path TEMPLATE_DIR = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "report", "templates");
+    public static final Path ASSETS_DIR = Paths.get(TEMPLATE_DIR.toString(), "assets");
     public static final Path REPORT_DIR;
     public static final Path REPORT_IMAGES_DIR;
 
