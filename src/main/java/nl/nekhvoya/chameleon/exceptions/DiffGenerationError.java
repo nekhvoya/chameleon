@@ -1,4 +1,4 @@
-package nl.nekhvoya.uichecker.exceptions;
+package nl.nekhvoya.chameleon.exceptions;
 
 public class DiffGenerationError extends Error {
     public DiffGenerationError(String message, Throwable t) {

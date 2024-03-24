@@ -1,4 +1,4 @@
-package nl.nekhvoya.uichecker.exceptions;
+package nl.nekhvoya.chameleon.exceptions;
 
 import java.nio.file.Path;
 

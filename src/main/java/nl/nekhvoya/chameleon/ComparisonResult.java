@@ -1,4 +1,4 @@
-package nl.nekhvoya.uichecker;
+package nl.nekhvoya.chameleon;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +8,7 @@ import java.nio.file.Path;
 @Data
 @Builder
 public class ComparisonResult {
+    private String name;
     private boolean passed;
     private Path result;
     private Path ref;

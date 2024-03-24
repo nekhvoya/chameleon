@@ -1,4 +1,4 @@
-# PI Compare
+# Chameleon
 
 This is a small library comparing images. 
 It's goal is to provide an easy comparison tool allowing to verify correctness of images.
@@ -11,7 +11,7 @@ It can be easily integrated with any e2e tests written in Java to compare the sc
 ## How to configure
 
 All one needs to do is 
-* to set paths to the reference and test results directories `pi.properties` file
+* to set paths to the reference and test results directories `chameleon.properties` file
 * implement taking a screenshot at the end of each test and save it (the static method `saveScreenshot()` can be used)
 * call `compare()` at the end of the test run (in the `AfterAll` hook)
 * save reference files in the configured reference directory

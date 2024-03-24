@@ -1,6 +1,6 @@
-package nl.nekhvoya.uichecker;
+package nl.nekhvoya.chameleon;
 
-import nl.nekhvoya.uichecker.exceptions.ConfigurationException;
+import nl.nekhvoya.chameleon.exceptions.ConfigurationException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +19,7 @@ public class Config {
     public static final Path DIFF_DIR;
 
     static {
-        try (InputStream is = Pi.class.getClassLoader().getResourceAsStream("pi.properties")) {
+        try (InputStream is = Chameleon.class.getClassLoader().getResourceAsStream("chameleon.properties")) {
 
             Properties configProps = new Properties();
             configProps.load(is);

@@ -1,6 +1,7 @@
-package nl.nekhvoya.uichecker;
+package nl.nekhvoya.chameleon;
 
-import nl.nekhvoya.uichecker.exceptions.*;
+import nl.nekhvoya.chameleon.exceptions.*;
+import nl.nekhvoya.chameleon.report.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,15 +14,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
+import static nl.nekhvoya.chameleon.Config.*;
 
-import static java.util.Objects.nonNull;
-import static nl.nekhvoya.uichecker.Config.*;
-
-public class Pi {
+public class Chameleon {
+    public static final String IMAGE_FORMAT = "png";
 
     public static void saveScreenshot(byte[] screenshot, String testName) {
-        Path destinationFile = Paths.get(TEST_RESULTS_DIR.toFile().getAbsolutePath(),
-                "%s.png".formatted(testName.replaceAll(" ", "_")));
+        Path destinationFile = Paths.get(TEST_RESULTS_DIR.toFile().getAbsolutePath(), convertToFileName(testName) );
         try {
             Files.write(destinationFile, screenshot);
         } catch (IOException e) {
@@ -29,7 +29,7 @@ public class Pi {
         }
     }
 
-    public static List<ComparisonResult> compare() {
+    public static void compare() {
         List<ComparisonResult> comparisonResults = new LinkedList<>();
 
         try (Stream<Path> results = Files.list(TEST_RESULTS_DIR).filter(result -> result.toFile().isFile())) {
@@ -40,7 +40,8 @@ public class Pi {
                     Path diff = createDiff(result, reference);
 
                     ComparisonResult comparisonResult = ComparisonResult.builder()
-                            .passed(nonNull(diff))
+                            .name(convertToTestName(result.toFile().getName()))
+                            .passed(isNull(diff))
                             .result(result)
                             .ref(reference)
                             .diff(diff)
@@ -56,7 +57,7 @@ public class Pi {
             throw new ImageComparisonError("Unable to get files for verification", e);
         }
 
-        return comparisonResults;
+        new ReportGenerator(comparisonResults).run();
     }
 
     private static Path createDiff(Path result, Path reference) {
@@ -85,7 +86,7 @@ public class Pi {
                 }
             }
             if (!passed) {
-                if (!ImageIO.write(diffImg, "png", diff.toFile())) {
+                if (!ImageIO.write(diffImg, IMAGE_FORMAT, diff.toFile())) {
                     throw new DiffGenerationError("Unable to save diff image in file %s".formatted(diff.toFile().getAbsolutePath()));
                 }
                 return diff;
@@ -94,5 +95,13 @@ public class Pi {
         } catch (IOException e) {
             throw new ImageComparisonError("Unable to verify images", e);
         }
+    }
+
+    private static String convertToFileName(String testName) {
+        return "%s.%s".formatted(testName.replaceAll(" ", "_"), IMAGE_FORMAT);
+    }
+
+    private static String convertToTestName(String fileName) {
+        return fileName.replaceAll("_", " ").replaceAll(".%s".formatted(IMAGE_FORMAT), "");
     }
 }
