@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <#include "css/report.css">
+        <#include "css/chameleon.css">
         <meta charset="UTF-8">
         <title>Chameleon Report</title>
     </head>
@@ -12,9 +12,25 @@
             <#list results as result>
                 <div class="result-container">
                     <div class="result-summary">
-                        <div>Test   [ ${result.name} ]   --->   ${result.passed?then('PASSED', 'FAILED')}
+                        <div>Test   [ ${result.name} ]   --->
+                        <#if result.passed>
+                            <span class="passed"> PASSED </span>
+                        <#else>
+                            <span class="failed"> FAILED </span>
+                        </#if>
                         <#if !result.passed>
-                             <button class="diff-button">(Click here to see the diff)</button>
+                             <button class="diff-button" onclick="this.nextElementSibling.removeAttribute('hidden');">
+                             (Click here to see the diff)
+                             </button>
+                             <div class="diff-modal-container" hidden>
+                                 <div class="diff-modal">
+                                    <button class="close-button" onclick="this.parentElement.parentElement.hidden = true">&times;</button>
+                                    <div class="image-container">
+                                       <p>Diff [ ${result.name} ] :</p>
+                                       <img src="${result.diffImagePath}">
+                                    </div>
+                                 </div>
+                             </div>
                         </#if>
                         </div>
                     </div>

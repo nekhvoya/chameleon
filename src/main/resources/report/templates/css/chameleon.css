@@ -1,0 +1,86 @@
+<style type="text/css">
+body {
+    background-color:#d8e6e5;
+    font-family: Tahoma, Verdana, Helvetica, sans-serif;
+    color: #06211f;
+    padding: 20px;
+}
+
+.result-summary {
+  background-color: #dff7f7;
+  padding: .5rem .5%;
+  margin: 0.5rem 0 0 0;
+  font-weight: bold;
+}
+.passed {
+    color: #02a181;
+}
+.failed {
+    color: #b81c5f;
+}
+
+.images-container {
+  background-color:#f0ffff;
+  display: flex;
+  justify-content: space-around;
+  margin: 0 0 1rem 0;
+}
+.image-container {
+    width: 49%;
+}
+.image-container img {
+    width: 100%;
+}
+
+.diff-modal-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+.diff-modal {
+    background-color:#f0ffff;
+    border: 0.0625rem solid #06211f;
+    position: fixed;
+    overflow: auto;
+    width: fit-content;
+    height: fit-content;
+    inset: 0;
+    margin: auto;
+    padding: 2rem;
+}
+.diff-modal .image-container {
+    width: 100%;
+}
+
+.diff-button {
+    padding: 5px;
+    background-color: #dff7f7;
+    border-style: none;
+    text-decoration: underline dotted;
+}
+.diff-button:hover {
+    padding: 5px;
+    background-color: #f0ffff;
+    border-style: none;
+    cursor: pointer;
+    text-decoration: underline dotted;
+}
+.close-button {
+    background-color: #f0ffff;
+    border-style: none;
+    position: absolute;
+    right: 32px;
+    top: 32px;
+    width: 32px;
+    height: 32px;
+}
+.close-button:hover {
+    background-color: #dff7f7;
+    border-style: none;
+    cursor: pointer;
+}
+</style>

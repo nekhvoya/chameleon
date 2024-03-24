@@ -19,10 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static nl.nekhvoya.chameleon.Config.TEST_RESULTS_DIR;
 import static nl.nekhvoya.chameleon.Chameleon.IMAGE_FORMAT;
+import static nl.nekhvoya.chameleon.Config.TEST_RESULTS_DIR;
 import static nl.nekhvoya.chameleon.report.ReportConfig.REPORT_DIR;
 import static nl.nekhvoya.chameleon.report.ReportConfig.REPORT_IMAGES_DIR;
 
@@ -44,7 +43,7 @@ public class ReportGenerator {
                         .scaledResultImagePath(nonNull(scaledResult) ? assetsPath + scaledResult.getFileName() : null)
                         .refImagePath(nonNull(r.getRef()) ? REPORT_DIR.relativize(Config.REF_DIR) + File.separator + r.getRef().getFileName() : null)
                         .scaledRefImagePath(nonNull(scaledRef) ? assetsPath + scaledRef.getFileName() : null)
-                        .diffImagePath(isNull(r.getDiff())? null : r.getDiff() .toFile().getAbsolutePath())
+                        .diffImagePath(nonNull(r.getDiff())? REPORT_DIR.relativize(Config.DIFF_DIR) + File.separator + r.getRef().getFileName() : null)
                         .build(); })
                 .toList()
         );
