@@ -3,7 +3,6 @@ package nl.nekhvoya.chameleon.report;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import nl.nekhvoya.chameleon.ComparisonResult;
-import nl.nekhvoya.chameleon.Config;
 import nl.nekhvoya.chameleon.exceptions.ReportGenerationError;
 import org.imgscalr.Scalr;
 
@@ -23,7 +22,6 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static nl.nekhvoya.chameleon.Chameleon.IMAGE_FORMAT;
-import static nl.nekhvoya.chameleon.Config.TEST_RESULTS_DIR;
 import static nl.nekhvoya.chameleon.report.ReportConfig.*;
 
 public class ReportGenerator {
@@ -32,15 +30,21 @@ public class ReportGenerator {
     public ReportGenerator(List<ComparisonResult> comparisonResults) {
         dataModel.put("results",
                 comparisonResults
-                .stream()
-                .map(r -> ReportedResult.builder()
-                    .name(r.getName())
-                    .passed(r.isPassed())
-                    .resultImagePath(nonNull(r.getResult()) ? REPORT_DIR.relativize(TEST_RESULTS_DIR) + File.separator + r.getResult().getFileName() : null)
-                    .refImagePath(nonNull(r.getRef()) ? REPORT_DIR.relativize(Config.REF_DIR) + File.separator + r.getRef().getFileName() : null)
-                    .diffImagePath(nonNull(r.getDiff())? REPORT_DIR.relativize(Config.DIFF_DIR) + File.separator + r.getRef().getFileName() : null)
-                    .build())
-                .toList()
+                        .stream()
+                        .map(r -> {
+                            Path copiedRef = copyImageToReport(r.getRef(),"ref_");
+                            Path copiedResult = copyImageToReport(r.getResult(),"test_");
+                            Path copiedDiff = nonNull(r.getDiff())? copyImageToReport(r.getDiff(),"diff_") : null;
+
+                            return ReportedResult.builder()
+                                    .name(r.getName())
+                                    .passed(r.isPassed())
+                                    .resultImagePath(nonNull(copiedResult) ? REPORT_DIR.relativize(REPORT_IMAGES_DIR) + File.separator + copiedResult.getFileName() : null)
+                                    .refImagePath(nonNull(copiedRef) ? REPORT_DIR.relativize(REPORT_IMAGES_DIR) + File.separator + copiedRef.getFileName() : null)
+                                    .diffImagePath(nonNull(copiedDiff)? REPORT_DIR.relativize(REPORT_IMAGES_DIR) + File.separator + copiedDiff.getFileName() : null)
+                                    .build();
+                        })
+                        .toList()
         );
     }
 
@@ -57,6 +61,16 @@ public class ReportGenerator {
             main.process(dataModel, out);
         } catch (IOException | TemplateException e) {
             throw new ReportGenerationError(e);
+        }
+    }
+
+    private Path copyImageToReport(Path sourceImage, String imagePrefix) {
+        try {
+            return Files.copy(sourceImage,
+                    Paths.get(REPORT_IMAGES_DIR.toString(), imagePrefix + sourceImage.getFileName()),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            return null;
         }
     }
 

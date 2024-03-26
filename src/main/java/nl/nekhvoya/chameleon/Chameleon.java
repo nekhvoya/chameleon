@@ -17,9 +17,17 @@ import java.util.stream.Stream;
 import static java.util.Objects.isNull;
 import static nl.nekhvoya.chameleon.Config.*;
 
+/**
+ * Util methods enabling comparing of images.
+ */
 public class Chameleon {
     public static final String IMAGE_FORMAT = "png";
 
+    /**
+     * Allows to save an image in the directory of actual results.
+     * @param screenshot a byte array of the actual image
+     * @param testName the unique name of the test (used to bind the actual image and the reference)
+     */
     public static void saveScreenshot(byte[] screenshot, String testName) {
         Path destinationFile = Paths.get(TEST_RESULTS_DIR.toFile().getAbsolutePath(), convertToFileName(testName) );
         try {
@@ -29,7 +37,13 @@ public class Chameleon {
         }
     }
 
-    public static void compare() {
+
+    /**
+     * Runs the comparison analysis of actual images against the reference images.
+     * @param generateReport allows to define if the report should be generated based on the comparison results.
+     * @return list of the comparison results.
+     */
+    public static List<ComparisonResult> compare(boolean generateReport) {
         List<ComparisonResult> comparisonResults = new LinkedList<>();
 
         try (Stream<Path> results = Files.list(TEST_RESULTS_DIR).filter(result -> result.toFile().isFile())) {
@@ -57,7 +71,11 @@ public class Chameleon {
             throw new ImageComparisonError("Unable to get files for verification", e);
         }
 
-        new ReportGenerator(comparisonResults).run();
+        if (generateReport) {
+            new ReportGenerator(comparisonResults).run();
+        }
+
+        return comparisonResults;
     }
 
     private static Path createDiff(Path result, Path reference) {

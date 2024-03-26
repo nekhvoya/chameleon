@@ -22,3 +22,11 @@ After the completion of the image comparison, diff files will be generated for t
 After the execution of each test (certain test steps) a screenshot is made. The screenshot represents the current UI state.
 After the completion of the test run, image analysis starts. Newly taken screenshots are compared against the references.
 If the screenshot is different from the reference, the result of the comparison is considered failed and a diff image is created highlighting all the difference between the screenshot and the reference.
+
+## Reporting
+
+After the comparison is done, a report will be generated. The report will show the compared images (references and actual images) next to each other.
+If the comparison failed for a certain test, there will be a button that will open the generated diff image:
+![Report - Main page](./report_main.png)
+
+![Report - Diff](./report_diff.png)

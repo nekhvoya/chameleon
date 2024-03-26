@@ -36,6 +36,6 @@ public class ChameleonTest {
 
     @AfterAll
     public static void runAnalysis() {
-        Chameleon.compare();
+        Chameleon.compare(true);
     }
 }
