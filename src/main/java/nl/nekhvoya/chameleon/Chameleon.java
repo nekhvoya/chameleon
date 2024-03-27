@@ -10,11 +10,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Objects.isNull;
 import static nl.nekhvoya.chameleon.Config.*;
 
 /**
@@ -51,15 +51,18 @@ public class Chameleon {
                 try (Stream<Path> refs = Files.list(REF_DIR)) {
                     Path reference = refs.filter(ref -> ref.getFileName().toString().equals(result.getFileName().toString()))
                             .findFirst().orElseThrow(() -> new ReferenceNotFoundException(result));
-                    Path diff = createDiff(result, reference);
+
 
                     ComparisonResult comparisonResult = ComparisonResult.builder()
                             .name(convertToTestName(result.toFile().getName()))
-                            .passed(isNull(diff))
+                            .passed(true)
                             .result(result)
                             .ref(reference)
-                            .diff(diff)
+                            .warnings(new ArrayList<>())
+                            .errors(new ArrayList<>())
                             .build();
+
+                    addDiff(comparisonResult, result, reference);
 
                     comparisonResults.add(comparisonResult);
 
@@ -68,7 +71,7 @@ public class Chameleon {
                 }
             });
         } catch (IOException e) {
-            throw new ImageComparisonError("Unable to get files for verification", e);
+            throw new ImageComparisonError("Unable to get test results for verification", e);
         }
 
         if (generateReport) {
@@ -78,7 +81,7 @@ public class Chameleon {
         return comparisonResults;
     }
 
-    private static Path createDiff(Path result, Path reference) {
+    private static void addDiff(ComparisonResult comparisonResult, Path result, Path reference) {
         try {
             boolean passed = true;
             Path diff = Paths.get(DIFF_DIR.toFile().getAbsolutePath(), result.getFileName().toString());
@@ -86,32 +89,44 @@ public class Chameleon {
             BufferedImage resultImg = ImageIO.read(result.toFile());
             BufferedImage refImg = ImageIO.read(reference.toFile());
             BufferedImage diffImg = ImageIO.read(result.toFile());
+            int diffCount = 0;
 
             if (resultImg.getWidth() != refImg.getWidth() || resultImg.getHeight() != refImg.getHeight()) {
-                throw new InvalidReferenceError();
+                comparisonResult.getWarnings().add("Reference image and test image are different in size! Reference: %dx%d. Result: %dx%d"
+                        .formatted(refImg.getWidth(), refImg.getHeight(), resultImg.getWidth(), resultImg.getHeight()));
             }
 
             for (int x = 0; x < resultImg.getWidth(); x++) {
                 for (int y = 0; y < resultImg.getHeight(); y++) {
                     int resultPxl = resultImg.getRGB(x, y);
-                    int refPxl = refImg.getRGB(x, y);
+                    int refPxl;
+                    try {
+                        refPxl = refImg.getRGB(x, y);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        refPxl = -1;
+                    }
                     if (resultPxl == refPxl) {
                         diffImg.setRGB(x, y, resultPxl);
                     } else {
                         diffImg.setRGB(x, y, Color.CYAN.getRGB());
-                        passed = false;
+                        diffCount++;
                     }
                 }
             }
+            double diffPercent = (double) (diffCount * 100) / (resultImg.getWidth() * resultImg.getHeight());
+            if (diffPercent > DEVIATION) {
+                passed = false;
+            }
+            comparisonResult.setPassed(passed);
+
             if (!passed) {
                 if (!ImageIO.write(diffImg, IMAGE_FORMAT, diff.toFile())) {
-                    throw new DiffGenerationError("Unable to save diff image in file %s".formatted(diff.toFile().getAbsolutePath()));
+                   comparisonResult.getErrors().add("Unable to save diff image in file %s".formatted(diff.toFile().getAbsolutePath()));
                 }
-                return diff;
+                comparisonResult.setDiff(diff);
             }
-            return null;
         } catch (IOException e) {
-            throw new ImageComparisonError("Unable to verify images", e);
+            comparisonResult.getErrors().add("Unable to verify images: %s".formatted(e.getMessage()));
         }
     }
 

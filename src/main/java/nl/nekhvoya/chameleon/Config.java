@@ -18,6 +18,8 @@ public class Config {
     public static final Path REF_DIR;
     public static final Path DIFF_DIR;
 
+    public static final double DEVIATION;
+
     static {
         try (InputStream is = Chameleon.class.getClassLoader().getResourceAsStream("chameleon.properties")) {
 
@@ -28,6 +30,7 @@ public class Config {
                     DateTimeFormatter.ofPattern("dd-MM-yyyy_hh-mm-ss").format(Instant.now().atZone(ZoneOffset.systemDefault()))));
             REF_DIR = createDirectories(Paths.get(System.getProperty("user.dir"), configProps.getProperty("ref.dir")));
             DIFF_DIR = createDirectories(Paths.get(TEST_RESULTS_DIR.toFile().getAbsolutePath(), "diff"));
+            DEVIATION = Double.parseDouble(configProps.getProperty("deviation", "0.0"));
         } catch (IOException e) {
             throw new ConfigurationException(e);
         }
