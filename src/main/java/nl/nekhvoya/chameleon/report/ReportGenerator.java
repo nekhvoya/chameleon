@@ -32,8 +32,8 @@ public class ReportGenerator {
                 comparisonResults
                         .stream()
                         .map(r -> {
-                            Path copiedRef = copyImageToReport(r.getRef(),"ref_");
-                            Path copiedResult = copyImageToReport(r.getResult(),"test_");
+                            Path copiedRef = nonNull(r.getRef()) ? copyImageToReport(r.getRef(),"ref_") : null;
+                            Path copiedResult = nonNull(r.getResult()) ? copyImageToReport(r.getResult(),"test_") : null;
                             Path copiedDiff = nonNull(r.getDiff())? copyImageToReport(r.getDiff(),"diff_") : null;
 
                             return ReportedResult.builder()

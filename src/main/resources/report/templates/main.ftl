@@ -22,7 +22,7 @@
                         <#else>
                             <span class="failed"> FAILED </span>
                         </#if>
-                        <#if !result.passed>
+                        <#if !result.passed && result.diffImagePath??>
                              <button class="diff-button" onclick="this.nextElementSibling.removeAttribute('hidden');">
                              (Click here to see the diff)
                              </button>
@@ -42,11 +42,15 @@
                     <div class="images-container">
                         <div class="image-container">
                             <p>Reference:</p>
-                            <img src="${result.refImagePath}">
+                            <#if result.refImagePath??>
+                                <img src="${result.refImagePath}">
+                            </#if>
                         </div>
                         <div class="image-container">
                             <p>Test:</p>
-                            <img src="${result.resultImagePath}">
+                            <#if result.resultImagePath??>
+                                <img src="${result.resultImagePath}">
+                            </#if>
                         </div>
                     </div>
                 </div>

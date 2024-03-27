@@ -49,23 +49,26 @@ public class Chameleon {
         try (Stream<Path> results = Files.list(TEST_RESULTS_DIR).filter(result -> result.toFile().isFile())) {
             results.forEach(result -> {
                 try (Stream<Path> refs = Files.list(REF_DIR)) {
-                    Path reference = refs.filter(ref -> ref.getFileName().toString().equals(result.getFileName().toString()))
-                            .findFirst().orElseThrow(() -> new ReferenceNotFoundException(result));
-
-
                     ComparisonResult comparisonResult = ComparisonResult.builder()
                             .name(convertToTestName(result.toFile().getName()))
                             .passed(true)
                             .result(result)
-                            .ref(reference)
                             .warnings(new ArrayList<>())
                             .errors(new ArrayList<>())
                             .build();
 
-                    addDiff(comparisonResult, result, reference);
+                    refs.filter(ref -> ref.getFileName().toString().equals(result.getFileName().toString()))
+                            .findFirst().ifPresentOrElse(
+                                    reference -> {
+                                        comparisonResult.setRef(reference);
+                                        addDiff(comparisonResult, result, reference);
+                                    },
+                                    () -> {
+                                        comparisonResult.getErrors().add("Reference was not for test result %s".formatted(result.getFileName()));
+                                        comparisonResult.setPassed(false);
+                                    });
 
                     comparisonResults.add(comparisonResult);
-
                 } catch (IOException e) {
                     throw new DiffGenerationError("Unable to find references under path %s".formatted(REF_DIR.toFile().getAbsolutePath()), e);
                 }
