@@ -32,7 +32,7 @@ public class Config {
             DIFF_DIR = createDirectories(Paths.get(TEST_RESULTS_DIR.toFile().getAbsolutePath(), "diff"));
             DEVIATION = Double.parseDouble(configProps.getProperty("deviation", "0.0"));
         } catch (IOException e) {
-            throw new ConfigurationException(e);
+            throw new ConfigurationException("Could not load Chameleon configuration", e);
         }
     }
 }

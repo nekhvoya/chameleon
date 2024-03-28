@@ -1,7 +1,7 @@
 package nl.nekhvoya.chameleon.exceptions;
 
-public class ConfigurationException extends Error{
-    public ConfigurationException(Throwable e) {
-        super("Could not load Chameleon configuration", e);
+public class ConfigurationException extends Error {
+    public ConfigurationException(String message, Throwable e) {
+        super(message, e);
     }
 }

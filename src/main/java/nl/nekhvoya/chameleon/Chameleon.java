@@ -10,11 +10,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static nl.nekhvoya.chameleon.Config.*;
 
 /**
@@ -22,6 +22,7 @@ import static nl.nekhvoya.chameleon.Config.*;
  */
 public class Chameleon {
     public static final String IMAGE_FORMAT = "png";
+    private static final List<String> tests = new ArrayList<>();
 
     /**
      * Allows to save an image in the directory of actual results.
@@ -29,6 +30,7 @@ public class Chameleon {
      * @param testName the unique name of the test (used to bind the actual image and the reference)
      */
     public static void saveScreenshot(byte[] screenshot, String testName) {
+        tests.add(testName);
         Path destinationFile = Paths.get(TEST_RESULTS_DIR.toFile().getAbsolutePath(), convertToFileName(testName) );
         try {
             Files.write(destinationFile, screenshot);
@@ -46,36 +48,46 @@ public class Chameleon {
     public static List<ComparisonResult> compare(boolean generateReport) {
         List<ComparisonResult> comparisonResults = new LinkedList<>();
 
-        try (Stream<Path> results = Files.list(TEST_RESULTS_DIR).filter(result -> result.toFile().isFile())) {
-            results.forEach(result -> {
-                try (Stream<Path> refs = Files.list(REF_DIR)) {
-                    ComparisonResult comparisonResult = ComparisonResult.builder()
-                            .name(convertToTestName(result.toFile().getName()))
-                            .passed(true)
-                            .result(result)
-                            .warnings(new ArrayList<>())
-                            .errors(new ArrayList<>())
-                            .build();
+            tests.forEach(test -> {
+                ComparisonResult comparisonResult = ComparisonResult.builder()
+                        .name(test)
+                        .passed(true)
+                        .warnings(new ArrayList<>())
+                        .errors(new ArrayList<>())
+                        .build();
 
-                    refs.filter(ref -> ref.getFileName().toString().equals(result.getFileName().toString()))
+                try (Stream<Path> refs = Files.list(REF_DIR)) {
+                    refs.filter(ref -> convertToTestName(ref.getFileName().toString()).equals(test))
                             .findFirst().ifPresentOrElse(
-                                    reference -> {
-                                        comparisonResult.setRef(reference);
-                                        addDiff(comparisonResult, result, reference);
-                                    },
+                                    comparisonResult::setRef,
                                     () -> {
-                                        comparisonResult.getErrors().add("Reference was not for test result %s".formatted(result.getFileName()));
+                                        comparisonResult.getErrors().add("Reference was not for test %s".formatted(test));
                                         comparisonResult.setPassed(false);
                                     });
 
-                    comparisonResults.add(comparisonResult);
                 } catch (IOException e) {
-                    throw new DiffGenerationError("Unable to find references under path %s".formatted(REF_DIR.toFile().getAbsolutePath()), e);
+                    throw new ConfigurationException("Unable to get files for comparison", e);
                 }
+
+                try (Stream<Path> testResults = Files.list(TEST_RESULTS_DIR)) {
+                    testResults.filter(result -> result.toFile().isFile())
+                            .filter(result -> convertToTestName(result.getFileName().toString()).equals(test))
+                            .findFirst().ifPresentOrElse(
+                                    comparisonResult::setResult,
+                                    () -> {
+                                        comparisonResult.getErrors().add("Test image %s was not found".formatted(test));
+                                        comparisonResult.setPassed(false);
+                                    });
+                } catch (IOException e) {
+                    throw new ConfigurationException("Unable to get files for comparison", e);
+                }
+
+                if (nonNull(comparisonResult.getResult()) && nonNull(comparisonResult.getRef())) {
+                    addDiff(comparisonResult);
+                }
+
+                comparisonResults.add(comparisonResult);
             });
-        } catch (IOException e) {
-            throw new ImageComparisonError("Unable to get test results for verification", e);
-        }
 
         if (generateReport) {
             new ReportGenerator(comparisonResults).run();
@@ -84,14 +96,14 @@ public class Chameleon {
         return comparisonResults;
     }
 
-    private static void addDiff(ComparisonResult comparisonResult, Path result, Path reference) {
+    private static void addDiff(ComparisonResult comparisonResult) {
         try {
             boolean passed = true;
-            Path diff = Paths.get(DIFF_DIR.toFile().getAbsolutePath(), result.getFileName().toString());
+            Path diff = Paths.get(DIFF_DIR.toFile().getAbsolutePath(), comparisonResult.getResult().getFileName().toString());
 
-            BufferedImage resultImg = ImageIO.read(result.toFile());
-            BufferedImage refImg = ImageIO.read(reference.toFile());
-            BufferedImage diffImg = ImageIO.read(result.toFile());
+            BufferedImage resultImg = ImageIO.read(comparisonResult.getResult().toFile());
+            BufferedImage refImg = ImageIO.read(comparisonResult.getRef().toFile());
+            BufferedImage diffImg = ImageIO.read(comparisonResult.getResult().toFile());
             int diffCount = 0;
 
             if (resultImg.getWidth() != refImg.getWidth() || resultImg.getHeight() != refImg.getHeight()) {
