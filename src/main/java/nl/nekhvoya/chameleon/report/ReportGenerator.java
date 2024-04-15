@@ -42,6 +42,8 @@ public class ReportGenerator {
                                     .resultImagePath(nonNull(copiedResult) ? REPORT_DIR.relativize(REPORT_IMAGES_DIR) + File.separator + copiedResult.getFileName() : null)
                                     .refImagePath(nonNull(copiedRef) ? REPORT_DIR.relativize(REPORT_IMAGES_DIR) + File.separator + copiedRef.getFileName() : null)
                                     .diffImagePath(nonNull(copiedDiff)? REPORT_DIR.relativize(REPORT_IMAGES_DIR) + File.separator + copiedDiff.getFileName() : null)
+                                    .errors(r.getErrors())
+                                    .warnings(r.getWarnings())
                                     .build();
                         })
                         .toList()

@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static nl.nekhvoya.chameleon.Config.*;
 
@@ -105,6 +106,18 @@ public class Chameleon {
             BufferedImage refImg = ImageIO.read(comparisonResult.getRef().toFile());
             BufferedImage diffImg = ImageIO.read(comparisonResult.getResult().toFile());
             int diffCount = 0;
+
+            if (isNull(resultImg)) {
+                comparisonResult.getErrors().add("Could not perform the comparison. Result image was corrupted.");
+                comparisonResult.setPassed(false);
+                return;
+            }
+
+            if (isNull(refImg)) {
+                comparisonResult.getErrors().add("Could not perform the comparison. Reference image was corrupted.");
+                comparisonResult.setPassed(false);
+                return;
+            }
 
             if (resultImg.getWidth() != refImg.getWidth() || resultImg.getHeight() != refImg.getHeight()) {
                 comparisonResult.getWarnings().add("Reference image and test image are different in size! Reference: %dx%d. Result: %dx%d"

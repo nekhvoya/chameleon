@@ -19,8 +19,16 @@ body {
 .passed {
     color: #02a181;
 }
-.failed {
+.failed, .error {
     color: #b81c5f;
+    font-weight: bold;
+}
+.warning {
+    color: #fcba03;
+    font-weight: bold;
+}
+.errors, .warnings {
+    font-weight: normal;
 }
 
 .images-container {
