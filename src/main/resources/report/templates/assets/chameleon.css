@@ -44,7 +44,7 @@ body {
     width: 100%;
 }
 
-.diff-modal-container {
+.image-modal-container {
     position: fixed;
     top: 0;
     right: 0;
@@ -53,7 +53,7 @@ body {
     z-index: 1000;
     background-color: rgba(0, 0, 0, 0.75);
 }
-.diff-modal {
+.image-modal {
     background-color:#f0ffff;
     border: 0.0625rem solid #06211f;
     position: fixed;
@@ -64,7 +64,7 @@ body {
     margin: auto;
     padding: 2rem;
 }
-.diff-modal .image-container {
+.image-modal .image-container {
     width: 100%;
 }
 

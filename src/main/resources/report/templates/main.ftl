@@ -27,15 +27,7 @@
                                  <button class="diff-button" onclick="this.nextElementSibling.removeAttribute('hidden');">
                                  (Click here to see the diff)
                                  </button>
-                                 <div class="diff-modal-container" hidden>
-                                     <div class="diff-modal">
-                                        <button class="close-button" onclick="this.parentElement.parentElement.hidden = true">&times;</button>
-                                        <div class="image-container">
-                                           <p>Diff [ ${result.name} ] :</p>
-                                           <img src="${result.diffImagePath}">
-                                        </div>
-                                     </div>
-                                 </div>
+                                 <@imageModal type='Diff' resultName=result.name imagePath=result.diffImagePath></@imageModal>
                             </#if>
                             <div class="errors">
                                 <#list result.errors as error>
@@ -55,13 +47,15 @@
                         <div class="image-container">
                             <p>Reference:</p>
                             <#if result.refImagePath??>
-                                <img src="${result.refImagePath}">
+                                <img src="${result.refImagePath}" onclick="this.nextElementSibling.removeAttribute('hidden');">
+                                <@imageModal type='Reference' resultName=result.name imagePath=result.refImagePath></@imageModal>
                             </#if>
                         </div>
                         <div class="image-container">
                             <p>Test:</p>
                             <#if result.resultImagePath??>
-                                <img src="${result.resultImagePath}">
+                                <img src="${result.resultImagePath}" onclick="this.nextElementSibling.removeAttribute('hidden');">
+                                <@imageModal type='Test' resultName=result.name imagePath=result.resultImagePath></@imageModal>
                             </#if>
                         </div>
                     </div>
@@ -70,3 +64,15 @@
         </div>
     </body>
 </html>
+
+<#macro imageModal type resultName imagePath>
+<div class="image-modal-container" hidden onclick="if(!event.target.closest('.image-modal')) event.target.hidden=true">
+     <div class="image-modal">
+          <button class="close-button" onclick="this.parentElement.parentElement.hidden = true">&times;</button>
+          <div class="image-container">
+               <p>${type} [ ${resultName} ] :</p>
+               <img src="${imagePath}">
+          </div>
+     </div>
+</div>
+</#macro>
